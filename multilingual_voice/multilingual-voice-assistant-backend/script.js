@@ -16,7 +16,7 @@ startBtn.addEventListener("click", () => {
     recognition.stop();
     startBtn.textContent = "Start Listening";
   } else {
-    recognition.lang = inputLanguageSelect.value;
+    recognition.lang = inputLanguageSelect.value + "-US";
     recognition.start();
     startBtn.textContent = "Stop Listening";
   }
@@ -37,35 +37,30 @@ recognition.onresult = async (event) => {
   }
 };
 
-// Translation function using LibreTranslate API (no API key required)
+// Translation function using the backend endpoint
 async function translateText(text, targetLang) {
-  const sourceLang = inputLanguageSelect.value.split('-')[0];
-  const url = `https://libretranslate.com/translate`;
+  const sourceLang = inputLanguageSelect.value;
+  const url = `http://localhost:5000/translate`; // Use your deployed server URL in production
 
   try {
     const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        q: text,
-        source: sourceLang,
-        target: targetLang,
-        format: "text"
-      })
+        text: text,
+        sourceLang: sourceLang,
+        targetLang: targetLang,
+      }),
     });
 
     if (!response.ok) {
-      throw new Error(`LibreTranslate API error: ${response.status} ${response.statusText}`);
+      throw new Error(`Server error: ${response.status} ${response.statusText}`);
     }
 
     const data = await response.json();
-    if (data.translatedText) {
-      return data.translatedText;
-    } else {
-      throw new Error("Invalid response structure from LibreTranslate API");
-    }
+    return data.translatedText;
   } catch (error) {
-    console.error("Error with LibreTranslate API:", error);
+    console.error("Error with backend translation:", error);
     throw error;
   }
 }
