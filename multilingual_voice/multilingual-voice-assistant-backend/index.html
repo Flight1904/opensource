@@ -3,41 +3,340 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Multilingual Voice Assistant</title>
-  <link rel="stylesheet" href="styles.css">
+  <title>Voice Assistant - Translation</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(45deg, #ff8c00, #ff00cc, #00bfff);
+      background-size: 400% 400%;
+      animation: gradientAnimation 10s ease infinite;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    @keyframes gradientAnimation {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    h1 {
+      font-size: 3em;
+      text-align: center;
+      margin-bottom: 20px;
+      color: #fff;
+      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+      animation: bounceIn 2s ease;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+    }
+
+    @keyframes bounceIn {
+      0% { transform: scale(0); }
+      60% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+
+    .mic-icon {
+      font-size: 4em;
+      color: #fff;
+      animation: micPulse 1s infinite;
+      transition: 0.3s ease-in-out;
+      transform-origin: center center;
+    }
+
+    .mic-icon:hover {
+      color: #00ff00;
+      transform: scale(1.2);
+      animation: none;
+    }
+
+    @keyframes micPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+
+    .container {
+      background: rgba(0, 0, 0, 0.8);
+      border-radius: 25px;
+      padding: 30px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+      max-width: 450px;
+      width: 100%;
+      text-align: center;
+      position: relative;
+      left: calc(20% - 2in); /* Position the container */
+      transition: transform 0.3s ease-in-out;
+    }
+
+    .container:hover {
+      transform: scale(1.05);
+    }
+
+    select, button, textarea {
+      font-size: 1.4em;
+      padding: 15px;
+      margin: 15px 0;
+      width: 100%;
+      border-radius: 15px;
+      border: none;
+      outline: none;
+      transition: 0.3s ease-in-out;
+    }
+
+    select:focus, button:focus, textarea:focus {
+      box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+    }
+
+    button {
+      background: linear-gradient(45deg, #ff0080, #ffb6c1);
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.3s ease-in-out;
+      border-radius: 10px;
+      border: 1px solid transparent;
+    }
+
+    button:hover {
+      background: linear-gradient(45deg, #ff00cc, #ff8c00);
+      transform: scale(1.1);
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    button:active {
+      background: #ff0044;
+    }
+
+    select {
+      background-color: #333;
+      color: #fff;
+      border-radius: 10px;
+      padding: 10px;
+      font-size: 1.2em;
+    }
+
+    select option {
+      background-color: #555;
+    }
+
+    textarea {
+      background: #222;
+      color: #fff;
+      resize: none;
+      border-radius: 10px;
+      height: 120px;
+      font-size: 1.2em;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    #translationResult {
+      font-size: 1.6em;
+      color: #00bfff;
+      margin-top: 20px;
+      text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4);
+      animation: fadeIn 2s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+
+    .button-container {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+
+    .button-container button {
+      width: 48%;
+    }
+
+    .mic-icon {
+      font-size: 2em;
+      margin-right: 10px;
+      transition: 0.3s ease;
+      color: #fff;
+    }
+
+    .mic-icon.active {
+      color: #00ff00; /* Green color when active */
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+  </style>
 </head>
 <body>
+  <h1>
+    Multilingual Voice Assistant
+    <span id="micIcon" class="mic-icon">🎤</span>
+  </h1>
+
   <div class="container">
-    <h1>Multilingual Voice Assistant</h1>
-    
-    <div class="language-selection">
-      <label for="inputLanguageSelect">Input Language:</label>
-      <select id="inputLanguageSelect" class="dropdown">
-        <option value="en">English</option>
-        <option value="es">Spanish</option>
-        <option value="fr">French</option>
-        <option value="de">German</option>
-        <option value="hi">Hindi</option>
-        <option value="zh">Chinese</option>
-      </select>
+    <!-- Language Selection -->
+    <label for="inputLang">Choose the language you will speak:</label>
+    <select id="inputLang">
+      <option value="en">English</option>
+      <option value="es">Spanish</option>
+      <option value="fr">French</option>
+      <option value="de">German</option>
+      <option value="it">Italian</option>
+      <option value="ja">Japanese</option>
+    </select>
+
+    <label for="outputLang">Choose the language to translate to:</label>
+    <select id="outputLang">
+      <option value="en">English</option>
+      <option value="es">Spanish</option>
+      <option value="fr">French</option>
+      <option value="de">German</option>
+      <option value="it">Italian</option>
+      <option value="ja">Japanese</option>
+    </select>
+
+    <!-- Mic Icon and Button for voice input -->
+    <div class="button-container">
+      <button id="startListeningBtn">
+        <span id="micIcon" class="mic-icon">🎤</span> Start Listening
+      </button>
+      <button id="translateBtn">Translate Text</button>
     </div>
 
-    <div class="language-selection">
-      <label for="outputLanguageSelect">Translate To:</label>
-      <select id="outputLanguageSelect" class="dropdown">
-        <option value="en">English</option>
-        <option value="es">Spanish</option>
-        <option value="fr">French</option>
-        <option value="de">German</option>
-        <option value="hi">Hindi</option>
-        <option value="zh">Chinese</option>
-      </select>
-    </div>
+    <!-- Textarea for manual input -->
+    <textarea id="textInput" placeholder="Or type something..."></textarea>
 
-    <button id="startBtn">Start Listening</button>
-    <p id="transcript">Transcript: <span id="speechOutput"></span></p>
-    <p id="translation">Translation: <span id="translationOutput"></span></p>
+    <!-- Area to display translation result -->
+    <div id="translationResult"></div>
   </div>
-  <script src="script.js"></script>
+
+  <audio id="idleAudio" loop>
+    <source src="https://www.soundjay.com/button/beep-07.wav" type="audio/wav">
+  </audio>
+
+  <script>
+    let recognition;
+    let idleAudio = document.getElementById('idleAudio');
+    let isListening = false;
+
+    // Initialize SpeechRecognition if supported
+    if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+      recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.continuous = false;
+      recognition.lang = 'en-US';
+      recognition.interimResults = false;
+
+      recognition.onstart = () => {
+        console.log('Listening for voice input...');
+        isListening = true;
+        stopIdleAudio(); // Stop idle audio when listening starts
+        toggleMicIcon(true); // Highlight the mic icon when listening starts
+      };
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        console.log('Recognized text:', transcript);
+        document.getElementById('textInput').value = transcript;
+        translateText();  // Automatically translate after voice input
+      };
+
+      recognition.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        isListening = false;
+        toggleMicIcon(false);
+      };
+
+      recognition.onend = () => {
+        console.log('Voice input ended');
+        isListening = false;
+        toggleMicIcon(false);
+        startIdleAudio(); // Start idle audio after listening ends
+      };
+    }
+
+    // Start or stop speech recognition
+    document.getElementById('startListeningBtn').addEventListener('click', () => {
+      if (isListening) {
+        recognition.stop();
+      } else {
+        recognition.start();
+      }
+    });
+
+    // Translate the input text
+    async function translateText() {
+      const inputText = document.getElementById('textInput').value;
+      const inputLang = document.getElementById('inputLang').value;
+      const outputLang = document.getElementById('outputLang').value;
+
+      if (inputText === '') {
+        return;
+      }
+
+      try {
+        const response = await fetch('/translate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            text: inputText,
+            sourceLang: inputLang,
+            targetLang: outputLang,
+          }),
+        });
+
+        const data = await response.json();
+        if (data && data.translation) {
+          document.getElementById('translationResult').innerText = data.translation;
+        } else {
+          document.getElementById('translationResult').innerText = 'Translation failed. Please try again.';
+        }
+      } catch (error) {
+        console.error('Error translating text:', error);
+        document.getElementById('translationResult').innerText = 'Translation failed. Please try again.';
+      }
+    }
+
+    // Start idle audio when the page loads
+    function startIdleAudio() {
+      if (!isListening) {
+        idleAudio.play();
+      }
+    }
+
+    // Stop idle audio
+    function stopIdleAudio() {
+      idleAudio.pause();
+      idleAudio.currentTime = 0;
+    }
+
+    // Toggle mic icon active state
+    function toggleMicIcon(active) {
+      const micIcon = document.getElementById('micIcon');
+      if (active) {
+        micIcon.classList.add('active');
+      } else {
+        micIcon.classList.remove('active');
+      }
+    }
+
+    // Start idle audio on page load
+    startIdleAudio();
+  </script>
 </body>
 </html>

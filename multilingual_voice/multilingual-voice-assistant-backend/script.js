@@ -1,28 +1,28 @@
-// Select DOM elements
+// DOM Elements
 const startBtn = document.getElementById("startBtn");
 const inputLanguageSelect = document.getElementById("inputLanguageSelect");
 const outputLanguageSelect = document.getElementById("outputLanguageSelect");
 const speechOutput = document.getElementById("speechOutput");
 const translationOutput = document.getElementById("translationOutput");
 
-// Initialize speech recognition
+// Initialize Speech Recognition
 const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
 recognition.interimResults = false;
-recognition.lang = "en-US"; // Default language for recognition
+recognition.lang = "en-US"; // Default language
 
-// Toggle button text and start/stop recognition
+// Button click event to start and stop listening
 startBtn.addEventListener("click", () => {
   if (recognition.recognizing) {
     recognition.stop();
     startBtn.textContent = "Start Listening";
   } else {
-    recognition.lang = inputLanguageSelect.value + "-US";
+    recognition.lang = inputLanguageSelect.value + "-US"; // Set the recognition language
     recognition.start();
     startBtn.textContent = "Stop Listening";
   }
 });
 
-// Handle recognition results
+// Handle speech recognition results
 recognition.onresult = async (event) => {
   const transcript = event.results[0][0].transcript;
   speechOutput.textContent = transcript;
@@ -33,36 +33,27 @@ recognition.onresult = async (event) => {
     speakText(translation, outputLanguageSelect.value);
   } catch (error) {
     console.error("Translation error:", error);
-    translationOutput.textContent = "Translation failed. Check console for details.";
+    translationOutput.textContent = "Translation failed.";
   }
 };
 
-// Translation function using the backend endpoint
+// Send text to the backend to get translation
 async function translateText(text, targetLang) {
   const sourceLang = inputLanguageSelect.value;
-  const url = `http://localhost:5000/translate`; // Use your deployed server URL in production
+  const response = await fetch("/translate", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      text: text,
+      sourceLang: sourceLang,
+      targetLang: targetLang
+    })
+  });
 
-  try {
-    const response = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        text: text,
-        sourceLang: sourceLang,
-        targetLang: targetLang,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Server error: ${response.status} ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    return data.translatedText;
-  } catch (error) {
-    console.error("Error with backend translation:", error);
-    throw error;
-  }
+  const data = await response.json();
+  return data.translatedText;
 }
 
 // Text-to-speech function
@@ -72,7 +63,7 @@ function speakText(text, lang) {
   window.speechSynthesis.speak(utterance);
 }
 
-// Handle speech recognition errors
+// Handle recognition errors
 recognition.onerror = (event) => {
   console.error("Speech recognition error:", event.error);
 };
